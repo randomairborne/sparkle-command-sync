@@ -1,0 +1,11 @@
+[package]
+name = "sparkle-command-sync"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+twilight-http = { version = "0.16.0-rc.1", default-features = false }
+twilight-model = "0.16.0-rc.1"
+
+[dev-dependencies]
+twilight-interactions = "0.16.0-rc.1"
