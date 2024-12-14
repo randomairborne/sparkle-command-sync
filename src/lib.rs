@@ -152,9 +152,10 @@ fn choices_eq(a: &[CommandOptionChoice], b: &[CommandOptionChoice]) -> bool {
 }
 
 fn cmd_opt_choice_eq((a, b): (CommandOptionChoice, CommandOptionChoice)) -> bool {
-    a.name == b.name && localizations_eq(a.name_localizations.as_ref(), b.name_localizations.as_ref()) && a.value == b.value
+    a.name == b.name
+        && localizations_eq(a.name_localizations.as_ref(), b.name_localizations.as_ref())
+        && a.value == b.value
 }
-
 
 fn channel_types_eq(a: &[ChannelType], b: &[ChannelType]) -> bool {
     if a.len() != b.len() {
