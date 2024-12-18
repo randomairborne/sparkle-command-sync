@@ -1,4 +1,4 @@
-use crate::diff;
+use crate::{diff, Sorted};
 use twilight_interactions::command::{CommandModel, CreateCommand};
 use twilight_model::{
     application::command::Command,
@@ -85,13 +85,28 @@ fn basic_add_plus_delete() {
 }
 
 #[test]
+fn delete_all() {
+    let d = diff(
+        &[with_id(TestCmd2::create_command().into(), 1)],
+        &[with_id(TestCmd1::create_command().into(), 2)],
+    );
+    eprintln!("{d:#?}");
+    assert!(d.to_create.is_empty());
+    assert!(d.to_update.is_empty());
+    assert_eq!(d.to_delete.sorted(), &[Id::new(1), Id::new(2)]);
+}
+
+#[test]
 fn different_options() {
     let d = diff(
         &[with_id(TestCmd2::create_command().into(), 1)],
         &[TestCmd2Update::create_command().into()],
     );
     eprintln!("{d:#?}");
-    assert_eq!(d.to_update, &[(Id::new(1), TestCmd2Update::create_command().into())]);
+    assert_eq!(
+        d.to_update,
+        &[(Id::new(1), TestCmd2Update::create_command().into())]
+    );
     assert!(d.to_create.is_empty());
     assert!(d.to_delete.is_empty());
 }

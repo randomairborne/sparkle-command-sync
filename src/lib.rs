@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::nursery, clippy::pedantic)]
-use std::{cmp::Ordering, collections::HashMap, iter::zip};
+use std::{cmp::Ordering, collections::HashMap};
 
 use twilight_http::{request::Request, Client};
 use twilight_model::{
@@ -104,11 +104,9 @@ fn options_eq(a: &[CommandOption], b: &[CommandOption]) -> bool {
     if a.len() != b.len() {
         return false;
     }
-    let mut a = a.to_vec();
-    let mut b = b.to_vec();
-    a.sort_by(|a, b| a.name.cmp(&b.name));
-    b.sort_by(|a, b| a.name.cmp(&b.name));
-    zip(a, b).all(cmd_opt_eq)
+    let a = a.to_vec().sorted_by(|a, b| a.name.cmp(&b.name));
+    let b = b.to_vec().sorted_by(|a, b| a.name.cmp(&b.name));
+    std::iter::zip(a, b).all(cmd_opt_eq)
 }
 
 fn cmd_opt_eq((a, b): (CommandOption, CommandOption)) -> bool {
@@ -144,10 +142,8 @@ fn choices_eq(a: &[CommandOptionChoice], b: &[CommandOptionChoice]) -> bool {
     if a.len() != b.len() {
         return false;
     }
-    let mut a = a.to_vec();
-    let mut b = b.to_vec();
-    a.sort_by(|ae, be| ae.name.cmp(&be.name));
-    b.sort_by(|ae, be| ae.name.cmp(&be.name));
+    let a = a.to_vec().sorted_by(|ae, be| ae.name.cmp(&be.name));
+    let b = b.to_vec().sorted_by(|ae, be| ae.name.cmp(&be.name));
     std::iter::zip(a, b).all(cmd_opt_choice_eq)
 }
 
@@ -161,10 +157,8 @@ fn channel_types_eq(a: &[ChannelType], b: &[ChannelType]) -> bool {
     if a.len() != b.len() {
         return false;
     }
-    let mut a = a.to_vec();
-    let mut b = b.to_vec();
-    a.sort_by(|a, b| cmp_channel_types(*a, *b));
-    b.sort_by(|a, b| cmp_channel_types(*a, *b));
+    let a = a.to_vec().sorted_by(|a, b| cmp_channel_types(*a, *b));
+    let b = b.to_vec().sorted_by(|a, b| cmp_channel_types(*a, *b));
     a == b
 }
 
@@ -218,6 +212,35 @@ pub async fn sync<'a>(
     }
 
     Ok(())
+}
+
+pub trait Sorted {
+    #[must_use]
+    fn sorted(self) -> Self;
+}
+
+pub trait SortedBy<T> {
+    #[must_use]
+    fn sorted_by<F>(self, f: F) -> Self
+    where
+        F: for<'a, 'b> FnMut(&'a T, &'b T) -> std::cmp::Ordering;
+}
+
+impl<T> Sorted for Vec<T>
+where
+    T: PartialOrd + Ord,
+{
+    fn sorted(mut self) -> Self {
+        self.sort();
+        self
+    }
+}
+
+impl<T> SortedBy<T> for Vec<T> {
+    fn sorted_by<F: for<'a, 'b> FnMut(&'a T, &'b T) -> std::cmp::Ordering>(mut self, f: F) -> Self {
+        self.sort_by(f);
+        self
+    }
 }
 
 #[derive(Debug)]
