@@ -198,7 +198,7 @@ pub async fn sync<'a>(
         })
         .json(&command)
         .build()?;
-        client.request::<Command>(create_req).await?;
+        client.request::<Command>(create_req).await?.model().await?;
     }
 
     for command in diff.to_update {
@@ -208,7 +208,7 @@ pub async fn sync<'a>(
         })
         .json(&command)
         .build()?;
-        client.request::<Command>(create_req).await?;
+        client.request::<Command>(create_req).await?.model().await?;
     }
 
     Ok(())
